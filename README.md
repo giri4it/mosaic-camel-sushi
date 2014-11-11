@@ -380,7 +380,7 @@ The configuration of the SushiApplicationCache is setup by the 	applicationState
 	<from uri="cache://SushiApplicationCache?diskPersistent=true&amp;timeToLiveSeconds=3600&amp;timeToIdleSeconds=3600"/>
 	<to uri="log:com.backbase.extensions.camel.sushi?level=INFO"/>
 </route>
-
+```
 
 When accessing the Sushi HTML route for the first time, a new Application View State is created. For subsequent request, and requests to the Sushi Proxy, the Application View State ID must be part of the reqeust. For Sushi HTML, this must be passed as a HTTP Parameter (POST or GET) with the name sushiApplicationViewStateID
 
