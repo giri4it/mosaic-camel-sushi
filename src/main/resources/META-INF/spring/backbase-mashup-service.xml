@@ -1,0 +1,317 @@
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns="http://camel.apache.org/schema/spring" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+    <beans:bean id="sushiContextPopulatingProcessor"
+                class="com.backbase.expert.extensions.sushi.processors.context.SushiContextPopulatingProcessor"/>
+
+    <beans:bean id="viewStateSerializer" class="com.backbase.expert.extensions.sushi.util.Base64Serializer"/>
+
+    <beans:bean id="createNewApplicationViewState"
+                class="com.backbase.expert.extensions.sushi.processors.applicationviewstate.CreateApplicationViewStateProcessor"/>
+    <beans:bean id="buildHttpRequestFromApplicationViewState"
+                class="com.backbase.expert.extensions.sushi.processors.http.BuildHttpRequestFromApplicationViewStateProcessor"/>
+    <beans:bean id="loadSushiRecipeProcessor"
+                class="com.backbase.expert.extensions.sushi.processors.recipe.LoadSushiRecipeProcessor">
+        <beans:constructor-arg value="${sushi.recipe.path}"/>
+
+    </beans:bean>
+
+    <beans:bean id="htmlRewriteDomProcessor"
+                class="com.backbase.expert.extensions.sushi.processors.transformers.html.HtmlRewriteDomProcessor"/>
+    <beans:bean id="htmlRewriteLinksProcessor"
+                class="com.backbase.expert.extensions.sushi.processors.transformers.html.HtmlRewriteLinksProcessor"/>
+    <beans:bean id="applicationViewStateAggregationStrategy"
+                class="com.backbase.expert.extensions.sushi.aggregator.ApplicationViewStateAggregationStrategy"/>
+
+    <beans:bean id="proxyApplicationViewStateAggregationStrategy"
+                class="com.backbase.expert.extensions.sushi.aggregator.ProxyApplicationViewStateAggregationStrategy"/>
+
+
+    <beans:bean id="jsoupProcessor"
+                class="com.backbase.expert.extensions.sushi.processors.transformers.html.JSoupProcessor"/>
+
+    <beans:bean id="inlineJavaScriptRewriteProcessor"
+                class="com.backbase.expert.extensions.sushi.processors.transformers.javascript.JavascriptRewriteInlineLinksProcessor"/>
+
+    <beans:bean id="cssAddNamespaceProcessor"
+                class="com.backbase.expert.extensions.sushi.processors.transformers.css.CssAddNameSpaceProcessor"/>
+
+
+    <beans:bean id="redirectToRefererPage"
+                class="com.backbase.expert.extensions.sushi.processors.http.RedirectToRefererPageProcessor"/>
+
+    <beans:bean id="incomingCookiesProcessor"
+                class="com.backbase.expert.extensions.sushi.processors.http.IncomingCookiesProcessor"/>
+
+
+    <beans:bean id="extractApplicationViewStatePathProcessor"
+                class="com.backbase.expert.extensions.sushi.processors.applicationviewstate.ExtractApplicationViewStatePathProcessor"/>
+
+    <beans:bean id="sushiRecipeAggregationStrategy"
+                class="com.backbase.expert.extensions.sushi.aggregator.SushiRecipeAggregationStrategy"/>
+
+    <beans:bean id="sushiHttpBinding" class="com.backbase.expert.extensions.sushi.binding.SushiHttpBinding"/>
+
+    <beans:bean id="prepareRedirectRequestProcessor"
+                class="com.backbase.expert.extensions.sushi.processors.http.PrepareRedirectRequestProcessor"/>
+
+    <beans:bean id="extractApplicationViewStateUrl2StatePathProcessor"
+                class="com.backbase.expert.extensions.sushi.processors.applicationviewstate.ExtractApplicationViewStateUrl2StatePathProcessor"/>
+
+    <beans:bean id="externalJavascriptProcessor"
+                class="com.backbase.expert.extensions.sushi.processors.transformers.javascript.ExternalJavaScriptProcessor"/>
+
+    <beans:bean id="regexPathProcessor"
+                class="com.backbase.expert.extensions.sushi.processors.transformers.regex.ContentTypeBasedRegExPathByProcessor"/>
+
+
+    <beans:bean id="remoteResponseWrapperProcessor"
+                class="com.backbase.expert.extensions.sushi.processors.applicationviewstate.RemoteResponseWrapperProcessor"/>
+
+    <beans:bean id="remoteResponseUnwrapperProcessor"
+                class="com.backbase.expert.extensions.sushi.processors.applicationviewstate.RemoteResponseUnwrapperProcessor"/>
+
+    <routeContext id="com.backbase.mashup.service.sushi">
+
+        <!-- Main entry point for In Div HTML integration.
+        Request must include RecipeTemplateId and can optionally contain the Application View State ID and the Remote Request ID-->
+        <route id="sushiHtmlServlet">
+            <!-- Registers the sushi/html servlet on /<contexPath/services/sushi/html and is the main entry point for indiv integration -->
+            <from uri="servlet:///sushi/html?matchOnUriPrefix=true&amp;httpBindingRef=#sushiHttpBinding&amp;servletName=Mashup Servlet"/>
+            <!-- Add user context to headers (like logged in user, ip address and stuff -->
+            <process ref="userContextPopulatingProcessor"/>
+            <!-- Adds the contextPath and servletPath to the headers as we need this information for rewriting links -->
+            <process ref="sushiContextPopulatingProcessor"/>
+            <!-- Send exchange to direct://sushi/html endpoint -->
+            <to uri="direct://sushi/html"/>
+        </route>
+
+        <!-- Main entry point for IFrame HTML integration -->
+        <route id="sushiIframeServlet">
+            <from uri="servlet:///sushi/iframe?matchOnUriPrefix=true&amp;httpBindingRef=#sushiHttpBinding&amp;servletName=Mashup Servlet"/>
+            <!-- Add user context to headers (like logged in user, ip address and stuff -->
+            <process ref="userContextPopulatingProcessor"/>
+            <!-- Adds the contextPath and servletPath to the headers as we need this information for rewriting links -->
+            <process ref="sushiContextPopulatingProcessor"/>
+            <!-- Inform the direct://sushi/html that iframe integration is required -->
+            <setHeader headerName="SushiIframeEnabled">
+                <constant>true</constant>
+            </setHeader>
+            <!-- Extract application view state id from URL. -->
+            <process ref="extractApplicationViewStateUrl2StatePathProcessor"/>
+            <to uri="direct://sushi/html"/>
+        </route>
+
+        <!-- Main Entry Point for Sushi Proxy. Requests are always made with the application view state id in the url -->
+        <route>
+            <from uri="servlet:///sushi/proxy?matchOnUriPrefix=true&amp;httpBindingRef=#sushiHttpBinding&amp;servletName=Mashup Servlet"/>
+            <log message="Sushi Proxy Point"/>
+            <!-- Add user context to headers -->
+            <process ref="userContextPopulatingProcessor"/>
+            <!-- Add sushi context to headers -->
+            <process ref="sushiContextPopulatingProcessor"/>
+            <!-- Extract application view state id from URL. -->
+            <process ref="extractApplicationViewStatePathProcessor"/>
+            <!-- Send exchange to sushi proxy end point -->
+            <to uri="direct://sushi/proxy"/>
+        </route>
+
+
+        <!-- The main Sushi Route for HTML integration -->
+        <route id="sushiGenericHtml">
+            <from uri="direct://sushi/html"/>
+            <!-- When a request is made with SushiApplicationViewStateId in the header, then it will retrieve the current Application View State -->
+            <choice>
+                <when>
+                    <!-- If SushiApplicationViewStateId is filled in, retrieve current Application View State from Cache -->
+                    <simple>${headers.SushiApplicationViewStateId} != null and ${headers.SushiApplicationViewStateId} != 'null'</simple>
+                    <!-- Enrich current exchange with the cached application view state. -->
+                    <enrich uri="direct:getApplicationViewState" strategyRef="applicationViewStateAggregationStrategy"/>
+
+                    <!-- Get Response from Cache -->
+                    <setHeader headerName="CamelCacheKey">
+                        <simple>${property.SushiRemoteRequestId}</simple>
+                    </setHeader>
+                    <setHeader headerName="CamelCacheOperation">
+                        <constant>CamelCacheGet</constant>
+                    </setHeader>
+                    <to uri="cache://SushiResponseCache"/>
+                    <choice>
+                        <when>
+                            <simple>${header.CamelCacheElementWasFound} != null</simple>
+                            <log message="Response found in cache. Returning response and stopping exchange"/>
+                            <process ref="remoteResponseUnwrapperProcessor"/>
+                        </when>
+                        <otherwise>
+                            <log message="Response NOT found in cache. Not sure what to do. Maybe executing the request again?"/>
+                        </otherwise>
+                    </choice>
+                </when>
+                <otherwise>
+                    <!-- Create sushi recipe from headers -->
+                    <enrich uri="direct:getSushiRecipe" strategyRef="sushiRecipeAggregationStrategy"/>
+                    <!-- Create Application View State -->
+                    <process ref="createNewApplicationViewState"/>
+                    <!-- Store Application View State in Cache -->
+                    <to uri="direct:putApplicationViewStateCache" pattern="InOnly"/>
+                    <!-- Build Http Request -->
+                    <to uri="direct:sushiExecuteRequest"/>
+                    <!-- Convert to JSOUP document -->
+                    <process ref="jsoupProcessor"/>
+                    <!-- Rewrite scripts paths -->
+                    <process ref="htmlRewriteDomProcessor"/>
+                    <!-- Rewrite links -->
+                    <process ref="htmlRewriteLinksProcessor"/>
+                    <!-- Rewrite Inline Javascript links -->
+                    <process ref="inlineJavaScriptRewriteProcessor"/>
+                </otherwise>
+            </choice>
+        </route>
+
+        <!-- Restlet endpoints -->
+        <route id="sushiProxy">
+            <from uri="direct://sushi/proxy"/>
+            <!-- Update the the current url in the application view state -->
+            <enrich uri="direct:getApplicationViewState" strategyRef="proxyApplicationViewStateAggregationStrategy"/>
+
+            <to uri="direct:sushiExecuteRequest"/>
+            <log message="Selecting Transformer Orchestrating Engine based on Content Type ${header[Content-Type]}"/>
+            <!-- Begin Camel Transformation Orchestration Engine -->
+            <choice id="sushiProxyContentTransformerChoice">
+                <when>
+                    <simple>${header[Content-Type]} contains "text/css"</simple>
+                    <log message="TOE: Transforming CSS"/>
+                    <process ref="cssAddNamespaceProcessor"/>
+                </when>
+                <when>
+                    <simple>${header[Content-Type]} contains "text/html"</simple>
+                    <log message="TOE: Transforming TEXT/HTML"/>
+                    <!-- Convert to JSOUP document -->
+                    <process ref="jsoupProcessor"/>
+                    <!-- Rewrite scripts paths -->
+                    <process ref="htmlRewriteDomProcessor"/>
+                    <!-- Rewrite links -->
+                    <process ref="htmlRewriteLinksProcessor"/>
+                    <!-- Rewrite inline javascript -->
+                    <process ref="inlineJavaScriptRewriteProcessor"/>
+                    <!--<choice>-->
+                        <!--<when>-->
+                            <!--<simple>${header.CamelHttpMethod} == 'POST' || ${header.referer} not contains '/services/sushi/'</simple>-->
+                            <!-- Update application view state in cache -->
+                            <to uri="direct:putApplicationViewStateCache" pattern="InOnly"/>
+                            <!-- Store response on Response Cache -->
+                            <to uri="direct:putResponseInResponseCache" pattern="InOnly"/>
+                            <!-- Redirect to referer page ONLY IN G:INCLUDE  -->
+                            <process ref="redirectToRefererPage"/>
+                        <!--</when>-->
+                    <!--</choice>-->
+
+                </when>
+                <when>
+                    <simple>${header[Content-Type]} contains "application/x-javascript"</simple>
+                    <process ref="externalJavascriptProcessor"/>
+                    <process ref="regexPathProcessor"/>
+                </when>
+                <when>
+                    <simple>${body} is 'com.backbase.expert.extensions.sushi.RemoteResponse'</simple>
+                    <process ref="redirectToRefererPage"/>
+                </when>
+                <otherwise>
+                    <log message="Camel TOE: No Transformation Engine Found"/>
+                </otherwise>
+            </choice>
+        </route>
+
+        <!-- Check wheter I can wipe cache form eh_statistics -->
+        <route id="applicationStateCacheConfiguration">
+            <from uri="cache://SushiApplicationCache?diskPersistent=true&amp;timeToLiveSeconds=3600&amp;timeToIdleSeconds=3600"/>
+            <to uri="log:com.backbase.extensions.camel.sushi?level=INFO"/>
+        </route>
+
+        <!-- Check wheter I can wipe cache form eh_statistics -->
+        <route id="sushiResponseCacheConfiguration">
+            <from uri="cache://SushiResponseCache?diskPersistent=true&amp;timeToLiveSeconds=3600&amp;timeToIdleSeconds=3600"/>
+            <to uri="log:com.backbase.extensions.camel.sushi?level=INFO"/>
+        </route>
+
+        <route id="putInReponseCache">
+            <from uri="direct:putResponseInResponseCache"/>
+            <process ref="remoteResponseWrapperProcessor"/>
+            <setHeader headerName="CamelCacheKey">
+                <simple>${property.SushiRemoteRequestId}</simple>
+            </setHeader>
+            <setHeader headerName="CamelCacheOperation">
+                <constant>CamelCacheAdd</constant>
+            </setHeader>
+            <to uri="cache://SushiResponseCache"/>
+        </route>
+
+        <route id="getSushiRecipe">
+            <from uri="direct:getSushiRecipe"/>
+            <process ref="loadSushiRecipeProcessor"/>
+        </route>
+
+        <route id="sushiExecuteRequest">
+            <from uri="direct:sushiExecuteRequest"/>
+
+            <process ref="buildHttpRequestFromApplicationViewState"/>
+            <choice>
+                <when>
+                    <!-- When request URI contains https:// use secure https component. otherwise normal http -->
+                    <simple>${header.CamelHttpUri} contains &#39;https://&#39;</simple>
+                    <!--<to uri="https4://127.0.0.1?throwExceptionOnFailure=false&amp;httpClient.handleRedirects=true&amp;httpClient.maxRedirects=3&amp;proxyAuthHost=proxy02.backbase.com&amp;proxyAuthPort=3128&amp;proxyAuthScheme=http"/>-->
+                    <to uri="https4://127.0.0.1?throwExceptionOnFailure=false&amp;httpClient.handleRedirects=true&amp;httpClient.maxRedirects=3"/>
+
+                </when>
+                <otherwise>
+                    <to uri="http4://127.0.0.1?throwExceptionOnFailure=false&amp;httpClient.handleRedirects=true&amp;httpClient.maxRedirects=3"/>
+                </otherwise>
+            </choice>
+            <process ref="incomingCookiesProcessor"/>
+            <choice>
+                <when>
+                    <simple>${header.CamelHttpResponseCode} == 302</simple>
+                    <process ref="prepareRedirectRequestProcessor"/>
+                    <to uri="direct:sushiExecuteRequest"/>
+                    <!--<to uri="direct:putResponseInResponseCache" pattern="InOnly"/>-->
+                </when>
+            </choice>
+        </route>
+
+        <route id="putApplicationViewStateInCache">
+            <from uri="direct:putApplicationViewStateCache"/>
+            <setHeader headerName="CamelCacheKey">
+                <simple>${property.SushiApplicationViewState.id}</simple>
+            </setHeader>
+            <setProperty propertyName="tempBody">
+                <simple>${body}</simple>
+            </setProperty>
+
+            <setBody>
+                <simple>${property.SushiApplicationViewState}</simple>
+            </setBody>
+            <setHeader headerName="CamelCacheOperation">
+                <constant>CamelCacheAdd</constant>
+            </setHeader>
+            <to uri="cache://SushiApplicationCache"/>
+            <setBody>
+                <property>tempBody</property>
+            </setBody>
+        </route>
+
+        <route id="getApplicationViewState">
+            <from uri="direct:getApplicationViewState"/>
+            <setHeader headerName="CamelCacheKey">
+                <simple>${header.SushiApplicationViewStateId}</simple>
+            </setHeader>
+            <setHeader headerName="CamelCacheOperation">
+                <constant>CamelCacheGet</constant>
+            </setHeader>
+            <to uri="cache://SushiApplicationCache"/>
+        </route>
+
+
+    </routeContext>
+</beans:beans>

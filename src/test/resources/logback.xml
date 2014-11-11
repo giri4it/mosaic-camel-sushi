@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false" scan="true" scanPeriod="30 seconds">
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%-5level %logger - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <logger name="org.apache.camel" level="INFO"/>
+    <logger name="org.apache.camel.support" level="OFF"/>
+    <logger name="org.apache.camel.processor.interceptor" level="INFO"/>
+    <logger name="org.apache.camel.META-INF.SpringCamelContext" level="INFO"/>
+    <logger name="org.apache.camel.component.http4" level="TRACE"/>
+    <logger name="com.backbase.expert.extensions.sushi" level="DEBUG"/>
+    <logger name="org.apache.http" level="TRACE"/>
+    <root level="TRACE">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>
+

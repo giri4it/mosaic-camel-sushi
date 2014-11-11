@@ -1,0 +1,34 @@
+{
+    "initialRequest": {
+        "populateHeaders": {
+            "httpHeaders": {
+                "Accept": "Accept",
+                "Accept-Language": "Accept-Language",
+                "Origin": "Origin",
+                "referer": "referer",
+                "User-Agent": "User-Agent",
+                "Content-Type": "Content-Type"
+            }
+        }
+    },
+    "htmlResultNodeSelector": ".content-area",
+    "htmlResultNodeFilter": "",
+    "transferBodyAttributesToResultNode": false,
+    "transferBodyClassesToResultNode": false,
+    "transferHtmlClassesToResultNode": false,
+    "transferBodyScriptsToResultNode": false,
+    "transferInlineBodyScriptsToResultNode": false,
+    "transferHeadScriptsToResultNode": false,
+    "transferInlineHeadScriptsToResultNode": false,
+    "moveScriptsToEnd": true,
+    "moveInlineScriptsToEnd": true,
+    "headerScriptIncludeFilter": "/**/*.js",
+    "headerScriptExcludeFilter": "",
+    "bodyScriptIncludeFilter": "/**/*.js",
+    "bodyScriptExcludeFilter": "",
+    "transferCssLinksToResultNode": false,
+    "cssIncludeFilter": "/**/*.css",
+    "cssExcludeFilter": "",
+    "cssPrefix": "bojan",
+}
+

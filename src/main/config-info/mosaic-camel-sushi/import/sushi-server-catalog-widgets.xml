@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<catalog>
+    <widget>
+        <name>sushi-widget-generic</name>
+        <contextItemName>[BBHOST]</contextItemName>
+        <properties>
+            <property name="TemplateName">
+                <value type="string">Standard_Widget</value>
+            </property>
+            <property name="title">
+                <value type="string">Generic Sushi Widget</value>
+            </property>
+            <property name="thumbnailUrl">
+                <value type="string">$(contextRoot)/static/mosaic-sushi/widgets/generic/media/icon.png</value>
+            </property>
+            <property label="Widget Chrome" name="widgetChrome" viewHint="select-one,user,designModeOnly">
+                <value type="string">$(contextRoot)/static/launchpad/chromes/blank/chrome-blank.html</value>
+            </property>
+            <property name="src">
+                <value type="string">$(contextRoot)/static/mosaic-sushi/widgets/generic/index.html</value>
+            </property>
+            <property name="sushiTemplateId" viewHint="text-input,user,designModeOnly">
+                <value type="string"></value>
+            </property>
+            <property name="sushiApplicationViewStateId">
+                <value type="string">[$1:null]</value>
+            </property>
+            <property name="sushiRemoteRequestId">
+                <value type="string">[$2:null]</value>
+            </property>
+        </properties>
+        <tags>
+            <tag type="section">mosaic</tag>
+            <tag type="regular">mosaic</tag>
+        </tags>
+    </widget>
+</catalog>

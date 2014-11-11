@@ -1,0 +1,88 @@
+{
+    "initialRequest": {
+        "remoteApplicationUrl": "https://o2o.sbtst2.moneykit.net/TDGate/gate/NBW010003",
+        "remoteHttpMethod": "POST",
+        "postParameterNames": ["LoginKS", "__type", "__gid", "__fid", "__uid", "__sid", "B_ID", "NextGid", "redirectUrl"],
+        "populateHeaders": {
+            "authentication": {
+                "__uid": "uid",
+                "__sid": "sid",
+                "LoginKS": "loginKS"
+            },
+            "principal": {
+                "username": "username",
+                "groups": "groups"
+            },
+            "constants": {
+                "Authorization": "Basic ZmpzZTAzOjcwMjE=",
+                "__type": "0023",
+                "__fid": "NBP010103",
+                "__gid": "NBP010103G01",
+                "__uid": "0010998878",
+                "__sid": "EZTTVI3ioceoTMaCpluSequiXQiMHBN3PFOvyABTNMuW5sMbmUuuVqYr3o63MQzz",
+                "LoginKS": "1",
+                "B_ID": "1",
+                "NextGid": "NBP010103G01",
+                "redirectUrl": ""
+            },
+            "cookies": ["J_SESSIONID"],
+            "httpHeaders": {
+                "Accept": "Accept",
+                "Accept-Encoding": "Accept-Encoding",
+                "Accept-Language": "Accept-Language",
+                "Origin": "Origin",
+                "referer": "referer",
+                "User-Agent": "User-Agent",
+                "Content-Type": "Content-Type",
+                "Authorization": "Authorization",
+                "Cache-Control": "Cache-Control"
+            }
+        }
+    },
+    "eachRequest": {
+        "populateHeaders": {
+            "constants": {
+                "Authorization": "Basic ZmpzZTAzOjcwMjE="
+            },
+            "httpHeaders": {
+                "Accept": "Accept",
+                "Accept-Language": "Accept-Language",
+                "Origin": "Origin",
+                "referer": "referer",
+                "User-Agent": "User-Agent",
+                "Content-Type": "Content-Type",
+                "Authorization": "Authorization"
+            }
+        }
+
+    },
+    "externalResourceEncoding": "SJIS",
+    "convertExternalResourceEncoding": true,
+    "htmlResultNodeSelector": "body",
+    "htmlResultNodeFilter": [],
+    "transferBodyAttributesToResultNode": true,
+    "transferBodyClassesToResultNode": true,
+    "transferHtmlClassesToResultNode": true,
+    "transferBodyScriptsToResultNode": true,
+    "transferInlineBodyScriptsToResultNode": true,
+    "transferHeadScriptsToResultNode": true,
+    "transferInlineHeadScriptsToResultNode": true,
+    "moveScriptsToEnd": true,
+    "moveInlineScriptsToEnd": true,
+    "headerScriptIncludeFilter": "/**/*.js",
+    "headerScriptExcludeFilter": "",
+    "bodyScriptIncludeFilter": "/**/*.js",
+    "bodyScriptExcludeFilter": "",
+    "transferCssLinksToResultNode": false,
+    "cssIncludeFilter": "/**/*.css",
+    "cssExcludeFilter": "",
+    "cssPrefix": "",
+    "transformers": {
+        "javascript": {
+            "patterns": ["(?i)(?<=document.HOST.action=\")/",
+                         "(?i)(?<=href=\")/"]
+
+        }
+    }
+
+}

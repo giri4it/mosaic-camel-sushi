@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" xmlns:g="http://www.backbase.com/2008/gadget">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Sushi Widget</title>
+</head>
+<body>
+
+<g:preferences>
+    <g:preference name="sushiTemplateId" label="Sushi Template ID" type="text" />
+</g:preferences>
+
+<div class="sushi-widget">
+
+    <g:include proxy="false" src="$(contextRoot)/services/sushi/html">
+        <g:http-param name="sushiTemplateId" value="${sushiTemplateId}"/>
+        <!-- Application View State -->
+        <g:http-param name="sushiApplicationViewStateId" value="${sushiApplicationViewStateId}"/>
+        <!-- Remote Request ID -->
+        <g:http-param name="sushiRemoteRequestId" value="${sushiRemoteRequestId}"/>
+
+    </g:include>
+</div>
+</body>
+</html>
